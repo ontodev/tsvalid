@@ -18,6 +18,4 @@ def validate_file(
     :param fail_hard: if True, validation will fail when error is encountered.
     """
     checker = TSValidChecker(input_path, exceptions)
-    checker.validate_file_level_characteristics(fail=fail_hard)
-    checker.validate_line_level_characteristics(fail=fail_hard)
-    return
+    checker.validate(fail=fail_hard)
