@@ -4,8 +4,8 @@ sssom package
 Submodules
 ----------
 
-sssom.cli module
-----------------
+tsvalid.cli module
+------------------
 
 .. automodule:: tsvalid.cli
    :members:

@@ -1,10 +1,10 @@
 TSValid CLI usage
-===============
+=================
 
 .. code-block:: bash
 
-    tsvalid tests/data/basic.tsv
+    tsvalid tests/data/test_all_wrong.tsv --summary
     
-.. click:: sssom.cli:main
+.. click:: tsvalid.cli:validate
     :prog: tsvalid
     :nested: full

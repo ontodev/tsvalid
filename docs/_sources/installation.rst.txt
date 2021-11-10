@@ -10,7 +10,12 @@ First clone the GitHub repository and then install,
 
 .. code-block:: bash
 
-    git clone https://github.com/matentzn/tsvalid
-    cd sssom-py
+    git clone https://github.com/ontodev/tsvalid
+    cd tsvalid
     python setup.py install
 
+Alternatively, you can use pypi,
+
+    .. code-block:: bash
+
+        pip install tsvalid

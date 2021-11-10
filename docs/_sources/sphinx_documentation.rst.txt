@@ -2,7 +2,9 @@ Documentation Update and Redeployment
 =====================================
 
 Using your terminal, ``cd`` to the 'sphinx' directory within the project.
-::
+
+.. code-block:: bash
+
     cd sphinx
 
 New page

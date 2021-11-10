@@ -6,4 +6,3 @@ SSSOM-PY
 
    setup
    tsvalid
-   tests
