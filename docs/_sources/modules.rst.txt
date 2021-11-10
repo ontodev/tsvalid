@@ -5,5 +5,5 @@ SSSOM-PY
    :maxdepth: 4
 
    setup
-   sssom
+   tsvalid
    tests

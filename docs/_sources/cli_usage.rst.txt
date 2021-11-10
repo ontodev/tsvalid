@@ -1,14 +1,10 @@
-SSSOM CLI usage
+TSValid CLI usage
 ===============
-
-The `sssom` script is a wrapper for multiple sub-commands
-
-The main one is `convert`
 
 .. code-block:: bash
 
-    sssom convert -i tests/data/basic.tsv -o basic.ttl
+    tsvalid tests/data/basic.tsv
     
 .. click:: sssom.cli:main
-    :prog: sssom-py
+    :prog: tsvalid
     :nested: full
