@@ -14,24 +14,36 @@ class TestValidate(unittest.TestCase):
 
     def test_validate_no_exceptions(self):
         """Run validate test on a TSV that is all correct."""
-        validate_file(self._file_path("all_correct"))
+        summary_report = validate_file(self._file_path("all_correct"))
+        print(summary_report)
+        self.assertFalse(summary_report)
 
     def test_validate_line_ending(self):
         """Run validate test on a TSV that has bad line endings."""
-        validate_file(self._file_path("line_ending"))
+        summary_report = validate_file(self._file_path("line_ending"))
+        self.assertEqual(summary_report["LinebreakEncodingCheck"]["count"], 157)
+        self.assertEqual(len(summary_report.keys()), 1)
 
     def test_validate_missing_columns(self):
         """Run validate test on a TSV that has missing columns."""
-        validate_file(self._file_path("missing_columns"))
+        summary_report = validate_file(self._file_path("missing_columns"))
+        self.assertEqual(summary_report["NumberOfTabsCheck"]["count"], 2)
+        self.assertEqual(len(summary_report.keys()), 1)
 
     def test_validate_all_wrong(self):
         """Run validate test on a TSV that is broken in various ways."""
-        validate_file(self._file_path("all_wrong"))
+        summary_report = validate_file(self._file_path("all_wrong"))
+        self.assertEqual(summary_report["MissingValueInHeaderCheck"]["count"], 1)
+        self.assertEqual(summary_report["NumberOfTabsCheck"]["count"], 15)
+        self.assertEqual(summary_report["LeadingWhitespaceCheck"]["count"], 1)
+        self.assertEqual(summary_report["EmptyLinesCheck"]["count"], 1)
+        self.assertEqual(summary_report["EmptyLastRowCheck"]["count"], 1)
+        self.assertEqual(summary_report["LinebreakEncodingCheck"]["count"], 31)
+        self.assertEqual(len(summary_report.keys()), 6)
 
     def test_validate_row_whitespace(self):
         """Run validate test on a TSV that has illegal whitespace in some rows."""
-        validate_file(self._file_path("row_whitespace"))
-
-    def test_validate_header_section(self):
-        """Run validate test on a TSV that has a header section."""
-        validate_file(self._file_path("header_section"))
+        summary_report = validate_file(self._file_path("row_whitespace"))
+        self.assertEqual(summary_report["TrailingWhitespaceCheck"]["count"], 1)
+        self.assertEqual(summary_report["LeadingWhitespaceCheck"]["count"], 1)
+        self.assertEqual(len(summary_report.keys()), 2)
