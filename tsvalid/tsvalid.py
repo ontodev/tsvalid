@@ -501,6 +501,7 @@ class TSValidChecker:
             for line in f:
                 line_counter = line_counter + 1
                 context[KEY_CURRENT_LINE] = line_counter
+                context[KEY_COLUMN] = 0
                 line_without_new_line = replace_newline_chars(line)
                 # print(f"Line {line_counter}: {line_without_new_line}")
 
@@ -549,6 +550,8 @@ class TSValidChecker:
                 last_line_without_new_line = line_without_new_line
                 last_line_with_new_line = line
 
+        context[KEY_COLUMN] = 0
+
         # Last row should be empty
         context[KEY_LAST_LINE] = context[KEY_CURRENT_LINE]
         self._run_check_and_append_report(
@@ -567,6 +570,7 @@ class TSValidChecker:
             for bl in fp:
                 line_counter = line_counter + 1
                 context[KEY_CURRENT_LINE] = line_counter
+                context[KEY_COLUMN] = 0
                 reports_line = self._run_checks(
                     checks=byte_level_checks, to_test=bl, context=context, fail=fail
                 )
