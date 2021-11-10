@@ -14,10 +14,8 @@ Contents
 
    modules
    installation
-   documentation
    examples
    cli_usage
-   sphinx_documentation
 
 
 Indices and tables

@@ -1,5 +1,5 @@
-SSSOM-PY
-========
+TSValid
+=======
 
 .. toctree::
    :maxdepth: 4
