@@ -351,7 +351,10 @@ class RedundantWhitespaceInCell(TSValidCellLevelCheck):
         :param: cell: the object that should be checked for failure condition
         :param: context: the context of the current check
         :return: True if failure condition is met, otherwise false.
+        :raises ValueError: If line is not a string.
         """
+        if not isinstance(cell, str):
+            raise ValueError(f"Cell passed in is not of type string: {str(cell)}.")
         return cell and not cell.strip()
 
 
@@ -389,10 +392,15 @@ class EmptyLastRowCheck(TSValidLineLevelCheck):
         :param: line: the object that should be checked for failure condition
         :param: context: the context of the current check
         :return: True if failure condition is met, otherwise False.
+        :raises ValueError: If line is not a string.
         """
         if KEY_LAST_LINE not in context:
             return False
-        return context[KEY_LAST_LINE] == context[KEY_CURRENT_LINE] and line
+        if not isinstance(line, str):
+            raise ValueError(f"Line passed in is not of type string: {str(line)}.")
+        return (
+            context[KEY_LAST_LINE] == context[KEY_CURRENT_LINE]
+        ) and not line.endswith("\n")
 
 
 # TSValid Checker
@@ -413,22 +421,12 @@ def _count_empty_values_in_cells(context: Dict[str, Any], line: str):
             )
 
 
-def print_summary(reports: List[TSValidReport], context: Dict[str, Any]):
+def print_summary(summary_report: Dict[str, Any], context: Dict[str, Any]):
     """Print summary of all reports gathered by a validation run."""
-    summary: Dict[str, Any] = {}
-    for report in reports:
-        clz = report.error_name
-        if clz not in summary:
-            summary[clz] = {}
-            summary[clz]["count"] = 0
-            summary[clz]["error_code"] = report.error_code
-            summary[clz]["message"] = report.generic_message
-        summary[clz]["count"] = summary[clz]["count"] + 1
-
-    if summary:
+    if summary_report:
         print("")
         print("##### TSValid Summary #####")
-        for e, info in summary.items():
+        for e, info in summary_report.items():
             print("")
             print(
                 "Error: "
@@ -444,6 +442,20 @@ def print_summary(reports: List[TSValidReport], context: Dict[str, Any]):
         print(f"tsvalid: {context[KEY_FILENAME]}: No errors found.")
 
 
+def prepare_summary(reports) -> Dict[str, Any]:
+    """Prepare summary report."""
+    summary: Dict[str, Any] = {}
+    for report in reports:
+        clz = report.error_name
+        if clz not in summary:
+            summary[clz] = {}
+            summary[clz]["count"] = 0
+            summary[clz]["error_code"] = report.error_code
+            summary[clz]["message"] = report.generic_message
+        summary[clz]["count"] = summary[clz]["count"] + 1
+    return summary
+
+
 class TSValidChecker:
     """Main class to coordinate the execution flow of the validation process."""
 
@@ -456,16 +468,18 @@ class TSValidChecker:
         else:
             self.exceptions = exceptions
 
-    def validate(self, fail=False, summary=True):
+    def validate(self, fail=False, summary=True) -> Dict[str, Any]:
         """Coordinate the execution of tests in TSValidateChecker."""
         # Declare all the checks that need to be run
-        line_level_checks = [
+        line_level_checks: List[TSValidCheck] = [
             TrailingWhitespaceCheck(),
             LeadingWhitespaceCheck(),
             NumberOfTabsCheck(),
             RedundantWhitespaceInCell(),
         ]
-        byte_level_checks = [LinebreakEncodingCheck()]
+        byte_level_checks: List[TSValidCheck] = [
+            LinebreakEncodingCheck(),
+        ]
         empty_line_check = EmptyLinesCheck()
         empty_last_line_check = EmptyLastRowCheck()
         empty_column_check = EmptyColumnCheck()
@@ -473,10 +487,12 @@ class TSValidChecker:
 
         # Declare context. This is a lightweight dictionary with minimal contextual information such as
         # filename, line number, column number, last or first line, etc
-        context = {KEY_FILENAME: self.file_path, KEY_COLUMN: "NA"}
-        reports = []
+        context: Dict[str, Any] = {KEY_FILENAME: self.file_path, KEY_COLUMN: "NA"}
+
+        reports: List[TSValidReport] = []
         line_counter = 0
         last_line_without_new_line = ""
+        last_line_with_new_line = ""
 
         # Loop through TSV file line by line and run checks. What makes this loop look a bit unintuitive is the fact
         # that a lot of the checks need some context to run, like checks that apply only to the first line, last line
@@ -531,11 +547,12 @@ class TSValidChecker:
                             reports,
                         )
                 last_line_without_new_line = line_without_new_line
+                last_line_with_new_line = line
 
         # Last row should be empty
         context[KEY_LAST_LINE] = context[KEY_CURRENT_LINE]
         self._run_check_and_append_report(
-            context, last_line_without_new_line, empty_last_line_check, reports
+            context, last_line_with_new_line, empty_last_line_check, reports
         )
 
         # Check no empty columns
@@ -547,23 +564,25 @@ class TSValidChecker:
         # Loop through the bystream to run byte-level checks
         line_counter = 0
         with open(self.file_path, "rb") as fp:
-            for line in fp:
+            for bl in fp:
                 line_counter = line_counter + 1
                 context[KEY_CURRENT_LINE] = line_counter
                 reports_line = self._run_checks(
-                    checks=byte_level_checks, to_test=line, context=context, fail=fail
+                    checks=byte_level_checks, to_test=bl, context=context, fail=fail
                 )
                 reports.extend(reports_line)
 
         # Print summary
+        summary_report = prepare_summary(reports)
         if summary:
-            print_summary(reports=reports, context=context)
+            print_summary(summary_report=summary_report, context=context)
+        return summary_report
 
     def _run_checks(
         self,
         checks: List[TSValidCheck],
         to_test: Union[str, bytes],
-        context=None,
+        context=Dict[str, Any],
         fail=False,
     ) -> List[TSValidReport]:
         reports: List[TSValidReport] = []
