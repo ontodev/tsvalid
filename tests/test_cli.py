@@ -12,9 +12,11 @@ class TestConvert(unittest.TestCase):
     """A test case for conversion utilities."""
 
     def setUp(self) -> None:
+        """Set up test."""
         self.tsv_path = os.path.join(data_dir, "test_missing_columns.tsv")
 
     def test_validate(self):
+        """Test the click CLI directly (validate method)."""
         runner = CliRunner()
         result = runner.invoke(validate, self.tsv_path)
         self.assertEqual(

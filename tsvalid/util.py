@@ -1,7 +1,7 @@
 """Utilities for TSValid."""
 
 import os
-from typing import Dict, Any
+from typing import Any, Dict
 
 import validators
 
@@ -16,8 +16,27 @@ def raise_for_bad_path(file_path: str) -> None:
         raise ValueError(f"{file_path} is not a valid file path or url.")
 
 
-def calculate_line_endings(path) -> Dict[Any, Any]:
-    # From https://stackoverflow.com/questions/29695861/get-newline-stats-for-a-text-file-in-python
+def replace_newline_chars(string: str) -> str:
+    """If the incoming string ends with a line break, remove it.
+
+    :param string: String from which to prune line breaks.
+    :return: The string without the line breaks
+    """
+    return (
+        string.replace("\r\n", "")
+        .replace("\n\r", "")
+        .replace("\n", "")
+        .replace("\r", "")
+    )
+
+
+def calculate_line_endings(path: str) -> Dict[Any, Any]:
+    """Count the number of line endings in a file.
+
+    From https://stackoverflow.com/questions/29695861/get-newline-stats-for-a-text-file-in-python.
+    :param: path: File to analyse
+    :return: a dictionary of counts
+    """
     endings = [
         b"\r\n",
         b"\n\r",

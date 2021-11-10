@@ -18,7 +18,6 @@ import click
 # Click input options common across commands
 from tsvalid.io import validate_file
 
-
 # @click.group()
 # @click.option("-v", "--verbose", count=True)
 # @click.option("-q", "--quiet")
@@ -36,8 +35,15 @@ from tsvalid.io import validate_file
 
 @click.command()
 @click.argument("input", required=True, type=click.Path())
-@click.option("--ignore", "-I", multiple=True)
-def validate(input: str, ignore: List[str]):
+@click.option("--ignore", multiple=True)
+@click.option(
+    "--summary",
+    default=False,
+    is_flag=True,
+    help="If true, prints an error summary at the end of validation.",
+    show_default=True,
+)
+def validate(input: str, ignore: List[str], summary: bool):
     """Validate a tsv file.
 
     .. warning:: currently only supports conversion to RDF)
@@ -45,7 +51,7 @@ def validate(input: str, ignore: List[str]):
     Example:
         tsvalid validate table.tsv
     """  # noqa: DAR101
-    validate_file(input_path=input, exceptions=ignore)
+    validate_file(input_path=input, exceptions=ignore, summary=summary)
 
 
 if __name__ == "__main__":

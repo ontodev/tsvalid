@@ -1,0 +1,18 @@
+#license: "https://creativecommons.org/publicdomain/zero/1.0/"
+#mapping_set_id: http://w3id.org/sssom/mapping/tests/data/basic.tsv
+#mapping_tool: "https://github.com/cmungall/rdf_matcher"
+#creator_id: "cjm"
+#mapping_date: "2020-05-30"
+#curie_map:
+#  a: "http://example.org/a/"
+#  rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+#  owl: "http://www.w3.org/2002/07/owl#"
+#  x: "http://example.org/x/"
+#  y: "http://example.org/y/"
+#  z: "http://example.org/z/"
+#  b: "http://example.org/b/"
+#  c: "http://example.org/c/"
+#  d: "http://example.org/d/"
+x:appendage	y:appendage	0.03982139852307098	0.03982139852307098	0.8407144059077161		0.07964279704614197
+x:appendage	z:appendage	0.02953594098668788	0.02953594098668788	0.8818562360532485		0.05907188197337576
+x:bone_element	y:bone	0.05883724076724989	0.05883724076724989	0.7646510369310004		0.11767448153449978
