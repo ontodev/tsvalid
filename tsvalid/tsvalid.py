@@ -16,54 +16,15 @@ KEY_FILENAME = "filename"
 KEY_CURRENT_CHECK = "error_code"
 KEY_CURRENT_MESSAGE = "error_message"
 KEY_CURRENT_CHECK_NAME = "error_name"
+KEY_ERROR_SUMMARY = "summary"
 
 
-def error(context: Dict[str, Any]):
+def print_validation_error(context: Dict[str, Any]):
     """Print an error using the standard linter grammar."""
     print(
-        f"tsvalid: {context[KEY_FILENAME]}:{context[KEY_CURRENT_LINE]}:{context[KEY_COLUMN]}: "
+        f"{context[KEY_FILENAME]}:{context[KEY_CURRENT_LINE]}:{context[KEY_COLUMN]}: "
         f"{context[KEY_CURRENT_CHECK]}: {context[KEY_CURRENT_MESSAGE]}"
     )
-
-
-class TSValidReport:
-    """A report for a single check."""
-
-    def __init__(self):
-        """Initialise an empty TSValid report."""
-        self.error_code = None
-        self.message = None
-        self.generic_message = None
-        self.error_name = None
-        self.context = None
-
-    def add_report(self, context: Dict[str, Any]):
-        """Add a report from contextual information."""
-        self._add_report_no_check(
-            context[KEY_CURRENT_CHECK],
-            context[KEY_CURRENT_MESSAGE],
-            context[KEY_CURRENT_CHECK_NAME],
-            context[KEY_CURRENT_MESSAGE],
-            context,
-        )
-
-    def _add_report_no_check(
-        self,
-        error_code: str,
-        generic_message: str,
-        error_name: str,
-        message: str,
-        context: Dict[str, Any],
-    ):
-        self.error_code = error_code
-        self.generic_message = generic_message
-        self.error_name = error_name
-        self.message = message
-        self.context = context.copy()
-
-    def empty(self) -> bool:
-        """Check whether report is empty, i.e has not been set yet."""
-        return not self.error_code
 
 
 class TSValidCheck:
@@ -78,27 +39,22 @@ class TSValidCheck:
         """Log some info on the check being run."""
         logging.info(f"Running check {type(self).__name__}, code {self.error_code}")
 
-    def check(
-        self, to_check: Union[str, bytes], context: Dict[str, Any]
-    ) -> List[TSValidReport]:
+    def check(self, to_check: str, context: Dict[str, Any]) -> bool:
         """Check an object (to_check), either a string or byte sequence, for failures."""
-        reports: List[TSValidReport] = []
-        self.collect_reports(context, to_check, reports)
-        return reports
+        raise NotImplementedError()
 
-    def add_report_if_failure(
+    def check_fail_condition_and_report(
         self,
         context: Dict[str, Any],
-        to_check: Union[str, bytes],
-        reports: List[TSValidReport],
+        to_check: str,
     ):
         """Check the failure condition. If failed, add report to reports list."""
-        if self.fail_condition(to_check, context):
-            report = report_failure(context=context, check=self)
-            if report:
-                reports.append(report)
+        if self._fail_condition(to_check, context):
+            report_failure(context=context, check=self)
+            return False
+        return True
 
-    def fail_condition(self, to_check: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, to_check: str, context: Dict[str, Any]) -> bool:
         """Check fail condidation (abstract).
 
         :param: to_check: the object that should be checked for failure condition
@@ -113,34 +69,38 @@ class TSValidCheck:
             line_number=context[KEY_CURRENT_LINE], column=context[KEY_COLUMN]
         )
 
-    def collect_reports(
-        self,
-        context: Dict[str, Any],
-        to_check: Union[str, bytes],
-        reports: List[TSValidReport],
-    ):
-        """Collect the reports on the failure checks (abstract)."""
-        raise NotImplementedError()
-
 
 def prepare_context_with_error_information(
     context: Dict[str, Any], check: TSValidCheck
 ):
-    """Prepare a context for the specific run of a check."""
+    """Prepare a context for the specific run of a check and update statistics."""
     context[KEY_CURRENT_CHECK] = check.error_code
     context[KEY_CURRENT_MESSAGE] = check.get_message(context)
     context[KEY_CURRENT_CHECK_NAME] = type(check).__name__
     if KEY_CURRENT_LINE not in context:
         context[KEY_CURRENT_LINE] = "NA"
+    if KEY_COLUMN not in context:
+        context[KEY_COLUMN] = "NA"
+
+    if KEY_ERROR_SUMMARY not in context:
+        context[KEY_ERROR_SUMMARY] = {}
+
+    # Updating summary statistics
+    clz = context[KEY_CURRENT_CHECK_NAME]
+    if clz not in context[KEY_ERROR_SUMMARY]:
+        context[KEY_ERROR_SUMMARY][clz] = {}
+        context[KEY_ERROR_SUMMARY][clz]["count"] = 0
+        context[KEY_ERROR_SUMMARY][clz]["error_code"] = context[KEY_CURRENT_CHECK]
+
+    context[KEY_ERROR_SUMMARY][clz]["count"] = (
+        context[KEY_ERROR_SUMMARY][clz]["count"] + 1
+    )
 
 
 def report_failure(check: TSValidCheck, context: Dict[str, Any]):
     """Write out failure information from a given check in a context."""
     prepare_context_with_error_information(context, check)
-    error(context)
-    report = TSValidReport()
-    report.add_report(context=context)
-    return report
+    print_validation_error(context)
 
 
 class TSValidCellLevelCheck(TSValidCheck):
@@ -150,7 +110,7 @@ class TSValidCellLevelCheck(TSValidCheck):
         """Build the TSValid cell level check."""
         super().__init__(error_code, error_message)
 
-    def fail_condition(self, cell: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, cell: str, context: Dict[str, Any]):
         """Check fail condidation (abstract).
 
         :param: cell: the object that should be checked for failure condition
@@ -159,17 +119,18 @@ class TSValidCellLevelCheck(TSValidCheck):
         """
         raise NotImplementedError()
 
-    def collect_reports(
+    def check(
         self,
+        to_check: str,
         context: Dict[str, Any],
-        to_check: Union[str, bytes],
-        reports: List[TSValidReport],
-    ):
+    ) -> bool:
         """Collect the reports on the cell level failure checks."""
+        success = True
         if isinstance(to_check, str):
             for idx, v in enumerate(to_check.split("\t")):
                 context[KEY_COLUMN] = idx
-                self.add_report_if_failure(context, v, reports)
+                self.check_fail_condition_and_report(context, v)
+        return success
 
 
 class TSValidLineLevelCheck(TSValidCheck):
@@ -179,7 +140,7 @@ class TSValidLineLevelCheck(TSValidCheck):
         """Build the TSValid cell level check."""
         super().__init__(error_code, error_message)
 
-    def fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, line: str, context: Dict[str, Any]):
         """Check fail condidation (abstract).
 
         :param: line: the object that should be checked for failure condition
@@ -188,17 +149,38 @@ class TSValidLineLevelCheck(TSValidCheck):
         """
         raise NotImplementedError()
 
-    def collect_reports(
+    def check(
         self,
+        to_check: str,
         context: Dict[str, Any],
-        to_check: Union[str, bytes],
-        reports: List[TSValidReport],
     ):
         """Collect the reports on the line level failure checks."""
-        self.add_report_if_failure(context, to_check, reports)
+        self.check_fail_condition_and_report(context, to_check)
 
 
 # TSValid Checks
+
+
+class FileEncodingCheck(TSValidCheck):
+    """Error that ensures that no wrong line endings are used."""
+
+    def check(self, to_check: str, context: Dict[str, Any]) -> bool:
+        """Check for bad file encoding (not implemented)."""
+        logging.info(f"{type(self).__name__} does not implement a check.")
+        return False
+
+    def __init__(self):
+        """Build a Linebreak-encoding check object."""
+        super().__init__("E0", f"Invalid file encoding {{{KEY_CURRENT_LINE}}}.")
+
+    def _fail_condition(self, line: str, context: Dict[str, Any]) -> bool:
+        """Check fail condidation (abstract).
+
+        :param: line: the object that should be checked for failure condition
+        :param: context: the context of the current check
+        :raises NotImplementedError: Should be implemented
+        """
+        raise NotImplementedError()
 
 
 class LinebreakEncodingCheck(TSValidLineLevelCheck):
@@ -206,14 +188,14 @@ class LinebreakEncodingCheck(TSValidLineLevelCheck):
 
     def __init__(self):
         """Build a Linebreak-encoding check object."""
-        super().__init__("E1", "Invalid line break in line {line_number}.")
+        super().__init__("E1", f"Invalid line break in line {{{KEY_CURRENT_LINE}}}.")
         self.endings = [
-            b"\r\n",
-            b"\n\r",
-            b"\r",
+            r"\r\n",
+            r"\n\r",
+            r"\r",
         ]
 
-    def fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]) -> bool:
+    def _fail_condition(self, line: str, context: Dict[str, Any]) -> bool:
         """Check fail condidation (abstract).
 
         :param: line: the object that should be checked for failure condition
@@ -221,52 +203,67 @@ class LinebreakEncodingCheck(TSValidLineLevelCheck):
         :return: True if failure condition is met, otherwise false.
         """
         for x in self.endings:
-            if line.endswith(x):
+            if re.search(x, line):
                 return True
         return False
 
 
-class LeadingWhitespaceCheck(TSValidLineLevelCheck):
+def _raise_if_not_string(s: str, context: Dict[str, Any]):
+    if not isinstance(s, str):
+        raise ValueError(
+            f"String passed in is not of type string: {s}, line {context[KEY_CURRENT_LINE]}."
+        )
+
+
+class LeadingWhitespaceCheck(TSValidCellLevelCheck):
     """Error that ensures that lines dont start with a whitespace."""
 
     def __init__(self):
         """Build a leading whitespace check object."""
         super().__init__(
-            "E2", "Illegal whitespace in the beginning of row {line_number}."
+            "E2",
+            f"Redundant leading whitespace in column {{{KEY_COLUMN}}} at line number {{{KEY_CURRENT_LINE}}}.",
         )
 
-    def fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, cell: str, context: Dict[str, Any]):
         """Check fail condidation (abstract).
 
-        :param: line: the object that should be checked for failure condition
+        :param: cell: the object that should be checked for failure condition
         :param: context: the context of the current check
         :return: True if failure condition is met, otherwise false.
         :raises ValueError: If line is not a string.
         """
-        if isinstance(line, str):
-            return line.startswith(" ")
+        if isinstance(cell, str):
+            return cell.startswith(" ")
         else:
-            raise ValueError("Line passed in is not of type string: {line}.")
+            raise ValueError(
+                f"Cell passed in is not of type string: {cell}, line {context[KEY_CURRENT_LINE]}."
+            )
 
 
-class TrailingWhitespaceCheck(TSValidLineLevelCheck):
+class TrailingWhitespaceCheck(TSValidCellLevelCheck):
     """Error that ensures that lines dont end with a whitespace."""
 
     def __init__(self):
         """Build a trailing whitespace check object."""
-        super().__init__("E3", "Illegal whitespace in the end of row {line_number}.")
+        super().__init__(
+            "E3",
+            f"Redundant trailing whitespace in column {{{KEY_COLUMN}}} at line number {{{KEY_CURRENT_LINE}}}.",
+        )
 
-    def fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, cell: str, context: Dict[str, Any]):
         """Check fail condidation (abstract).
 
-        :param: line: the object that should be checked for failure condition
+        :param: cell: the object that should be checked for failure condition
         :param: context: the context of the current check
         :return: True if failure condition is met, otherwise false.
         :raises ValueError: If line is not a string.
         """
-        if not isinstance(line, str):
-            raise ValueError(f"Line passed in is not of type string: {str(line)}.")
-        return line.endswith(" ")
+        if not isinstance(cell, str):
+            raise ValueError(
+                f"Cell passed in is not of type string: {cell}, line {context[KEY_CURRENT_LINE]}."
+            )
+        return cell.endswith(" ")
 
 
 class NumberOfTabsCheck(TSValidLineLevelCheck):
@@ -274,9 +271,9 @@ class NumberOfTabsCheck(TSValidLineLevelCheck):
 
     def __init__(self):
         """Build a number-of-tabs check object."""
-        super().__init__("E4", "Illegal number of tabs in line {line_number}.")
+        super().__init__("E4", f"Wrong number of tabs in line {{{KEY_CURRENT_LINE}}}.")
 
-    def fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]):
         """Check fail condidation (abstract).
 
         :param: line: the object that should be checked for failure condition
@@ -296,9 +293,9 @@ class EmptyLinesCheck(TSValidLineLevelCheck):
 
     def __init__(self):
         """Build an empty lines check object."""
-        super().__init__("E5", "Empty line {line_number}.")
+        super().__init__("E5", f"Empty line {{{KEY_CURRENT_LINE}}}.")
 
-    def fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]):
         """Check fail condidation (abstract).
 
         :param: line: the object that should be checked for failure condition
@@ -316,9 +313,11 @@ class MissingValueInHeaderCheck(TSValidCellLevelCheck):
 
     def __init__(self):
         """Build a missing value in header check object."""
-        super().__init__("E6", "Header row has missing values, line {line_number}.")
+        super().__init__(
+            "E6", f"Header row has missing values, line {{{KEY_CURRENT_LINE}}}."
+        )
 
-    def fail_condition(self, cell: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, cell: str, context: Dict[str, Any]):
         """Check fail condidation (abstract).
 
         :param: cell: the object that should be checked for failure condition
@@ -335,6 +334,29 @@ class MissingValueInHeaderCheck(TSValidCellLevelCheck):
         ) and not cell.strip()
 
 
+class DuplicateValueInHeaderCheck(TSValidLineLevelCheck):
+    """Check that the first row does not have any missing values."""
+
+    def __init__(self):
+        """Build a missing value in header check object."""
+        super().__init__(
+            "E10", f"Header row has duplicate values, line {{{KEY_CURRENT_LINE}}}."
+        )
+
+    def _fail_condition(self, line: str, context: Dict[str, Any]):
+        """Check fail condidation (abstract).
+
+        :param: line: the object that should be checked for failure condition
+        :param: context: the context of the current check
+        :return: True if failure condition is met, otherwise false.
+        :raises ValueError: If line is not a string.
+        """
+        if not isinstance(line, str):
+            raise ValueError(f"Line passed in is not of type string: {str(line)}.")
+        line_values = line.split("\t")
+        return len(line_values) != len(set(line_values))
+
+
 class RedundantWhitespaceInCell(TSValidCellLevelCheck):
     """Check that ensures that there is no redundant whitespace in an otherwise empty cell."""
 
@@ -342,10 +364,10 @@ class RedundantWhitespaceInCell(TSValidCellLevelCheck):
         """Build a redundant whitespace in cell check."""
         super().__init__(
             "E7",
-            "Row contains redundant whitespace in column {column}, line {line_number}.",
+            f"Row contains redundant whitespace in column {{{KEY_COLUMN}}}, line {{{KEY_CURRENT_LINE}}}.",
         )
 
-    def fail_condition(self, cell: Union[str, bytes], context=None):
+    def _fail_condition(self, cell: str, context=None):
         """Check fail condidation (abstract).
 
         :param: cell: the object that should be checked for failure condition
@@ -364,10 +386,10 @@ class EmptyColumnCheck(TSValidLineLevelCheck):
     def __init__(self):
         """Build check to look for entirely empty columns."""
         super().__init__(
-            "E8", "TSV file contains empty column at column index {column}."
+            "E8", f"TSV file contains empty column at column index {{{KEY_COLUMN}}}."
         )
 
-    def fail_condition(self, line: Union[str, bytes], context: Dict[str, Any]):
+    def _fail_condition(self, line: str, context: Dict[str, Any]):
         """Check fail condidation (abstract).
 
         :param: line: the object that should be checked for failure condition
@@ -386,7 +408,7 @@ class EmptyLastRowCheck(TSValidLineLevelCheck):
         """Build check to ensure last empty row."""
         super().__init__("E9", "Last row in file should be empty.")
 
-    def fail_condition(self, line: Union[str, bytes], context=None):
+    def _fail_condition(self, line: str, context=None):
         """Check fail condidation (abstract).
 
         :param: line: the object that should be checked for failure condition
@@ -442,24 +464,10 @@ def print_summary(summary_report: Dict[str, Any], context: Dict[str, Any]):
         print(f"tsvalid: {context[KEY_FILENAME]}: No errors found.")
 
 
-def prepare_summary(reports) -> Dict[str, Any]:
-    """Prepare summary report."""
-    summary: Dict[str, Any] = {}
-    for report in reports:
-        clz = report.error_name
-        if clz not in summary:
-            summary[clz] = {}
-            summary[clz]["count"] = 0
-            summary[clz]["error_code"] = report.error_code
-            summary[clz]["message"] = report.generic_message
-        summary[clz]["count"] = summary[clz]["count"] + 1
-    return summary
-
-
 class TSValidChecker:
     """Main class to coordinate the execution flow of the validation process."""
 
-    def __init__(self, file_path: str, exceptions: Optional[List[str]]):
+    def __init__(self, file_path: str, exceptions: Optional[List[str]], fail=False):
         """Set up TSValid checker class with a filepath and a list of exceptions."""
         raise_for_bad_path(file_path)
         self.file_path = file_path
@@ -467,8 +475,9 @@ class TSValidChecker:
             self.exceptions: List[str] = []
         else:
             self.exceptions = exceptions
+        self.fail = fail
 
-    def validate(self, fail=False, summary=True) -> Dict[str, Any]:
+    def validate(self, summary=True, encoding="UTF-8", comment=None) -> Dict[str, Any]:
         """Coordinate the execution of tests in TSValidateChecker."""
         # Declare all the checks that need to be run
         line_level_checks: List[TSValidCheck] = [
@@ -477,19 +486,18 @@ class TSValidChecker:
             NumberOfTabsCheck(),
             RedundantWhitespaceInCell(),
         ]
-        byte_level_checks: List[TSValidCheck] = [
-            LinebreakEncodingCheck(),
-        ]
         empty_line_check = EmptyLinesCheck()
+        duplicate_value_in_header_check = DuplicateValueInHeaderCheck()
+        line_break_encoding_check = LinebreakEncodingCheck()
         empty_last_line_check = EmptyLastRowCheck()
         empty_column_check = EmptyColumnCheck()
         missing_value_in_header_check = MissingValueInHeaderCheck()
+        file_encoding_check = FileEncodingCheck()
 
         # Declare context. This is a lightweight dictionary with minimal contextual information such as
         # filename, line number, column number, last or first line, etc
         context: Dict[str, Any] = {KEY_FILENAME: self.file_path, KEY_COLUMN: "NA"}
 
-        reports: List[TSValidReport] = []
         line_counter = 0
         last_line_without_new_line = ""
         last_line_with_new_line = ""
@@ -497,126 +505,121 @@ class TSValidChecker:
         # Loop through TSV file line by line and run checks. What makes this loop look a bit unintuitive is the fact
         # that a lot of the checks need some context to run, like checks that apply only to the first line, last line
         # and others
-        with open(self.file_path, "r") as f:
-            for line in f:
-                line_counter = line_counter + 1
-                context[KEY_CURRENT_LINE] = line_counter
-                context[KEY_COLUMN] = 0
-                line_without_new_line = replace_newline_chars(line)
-                # print(f"Line {line_counter}: {line_without_new_line}")
+        try:
+            with open(self.file_path, "r", encoding=encoding, newline="") as f:
+                for line in f:
+                    line_counter = line_counter + 1
+                    context[KEY_CURRENT_LINE] = line_counter
+                    context[KEY_COLUMN] = 0
+                    line_without_new_line = replace_newline_chars(line)
+                    # print(f"Line {line_counter}: {line_without_new_line}")
 
-                # We ignore all rows that start with a #. This is risky, as you may have genuine
-                # cases where values in the first column start with a hash
-                if not line_without_new_line.startswith("#"):
+                    # We ignore all rows that start with a #. This is risky, as you may have genuine
+                    # cases where values in the first column start with a hash
+                    if not comment or not line_without_new_line.startswith(comment):
 
-                    # Check for empty values and document them in the context. This will later determine
-                    # the outcome of the Empty Column Check
-                    _count_empty_values_in_cells(context, line)
+                        # Check for empty values and document them in the context. This will later determine
+                        # the outcome of the Empty Column Check
+                        _count_empty_values_in_cells(context, line)
 
-                    if KEY_TAB_COUNT not in context:
-                        # If it is not in context, it means we are talking about the first row.
-                        context[KEY_TAB_COUNT] = line_without_new_line.count("\t")
+                        if KEY_TAB_COUNT not in context:
+                            # If it is not in context, it means we are talking about the first row.
+                            context[KEY_TAB_COUNT] = line_without_new_line.count("\t")
 
-                    # If this is the first not-commented row, declare that in the context and
-                    # run first-row related checks
-                    if KEY_FIRST_ROW not in context:
-                        # The Missing Value in Header Check only runs on the first row.
-                        context[KEY_FIRST_ROW] = line_counter
-                        self._run_check_and_append_report(
-                            context,
-                            line_without_new_line,
-                            missing_value_in_header_check,
-                            reports,
+                        # If this is the first not-commented row, declare that in the context and
+                        # run first-row related checks
+                        if KEY_FIRST_ROW not in context:
+                            # The Missing Value in Header Check only runs on the first row.
+                            context[KEY_FIRST_ROW] = line_counter
+                            self._run_check_and_append_report(
+                                context,
+                                line_without_new_line,
+                                missing_value_in_header_check,
+                            )
+                            self._run_check_and_append_report(
+                                context,
+                                line_without_new_line,
+                                duplicate_value_in_header_check,
+                            )
+
+                        self._run_checks(
+                            checks=line_level_checks,
+                            to_test=line_without_new_line,
+                            context=context,
                         )
 
-                    reports_line = self._run_checks(
-                        checks=line_level_checks,
-                        to_test=line_without_new_line,
-                        context=context,
-                        fail=fail,
-                    )
-                    reports.extend(reports_line)
-
-                    if line_counter > 1:
-                        # Do the empty line check on the _previous_ line, because the last line
-                        # in the file is allowed to be empty.
-                        context[KEY_CURRENT_LINE] = line_counter - 1
                         self._run_check_and_append_report(
                             context,
-                            last_line_without_new_line,
-                            empty_line_check,
-                            reports,
+                            line,
+                            line_break_encoding_check,
                         )
-                last_line_without_new_line = line_without_new_line
-                last_line_with_new_line = line
+
+                        if line_counter > 1:
+                            # Do the empty line check on the _previous_ line, because the last line
+                            # in the file is allowed to be empty.
+                            context[KEY_CURRENT_LINE] = line_counter - 1
+                            self._run_check_and_append_report(
+                                context,
+                                last_line_without_new_line,
+                                empty_line_check,
+                            )
+                    last_line_without_new_line = line_without_new_line
+                    last_line_with_new_line = line
+        except UnicodeEncodeError:
+            prepare_context_with_error_information(
+                context=context, check=file_encoding_check
+            )
 
         context[KEY_COLUMN] = 0
 
         # Last row should be empty
         context[KEY_LAST_LINE] = context[KEY_CURRENT_LINE]
         self._run_check_and_append_report(
-            context, last_line_with_new_line, empty_last_line_check, reports
+            context,
+            last_line_with_new_line,
+            empty_last_line_check,
         )
 
         # Check no empty columns
         for column in context[KEY_COLUMN_VALUE_EMPTY_COUNTS]:
             if context[KEY_COLUMN_VALUE_EMPTY_COUNTS][column] == 0:
-                r = report_failure(empty_column_check, context)
-                reports.append(r)
-
-        # Loop through the bystream to run byte-level checks
-        line_counter = 0
-        with open(self.file_path, "rb") as fp:
-            for bl in fp:
-                line_counter = line_counter + 1
-                context[KEY_CURRENT_LINE] = line_counter
-                context[KEY_COLUMN] = 0
-                reports_line = self._run_checks(
-                    checks=byte_level_checks, to_test=bl, context=context, fail=fail
-                )
-                reports.extend(reports_line)
+                report_failure(check=empty_column_check, context=context)
+                self._consider_failing(success=False)
 
         # Print summary
-        summary_report = prepare_summary(reports)
-        if summary:
-            print_summary(summary_report=summary_report, context=context)
-        return summary_report
+        if summary and KEY_ERROR_SUMMARY in context:
+            summary_report = context[KEY_ERROR_SUMMARY]
+            if summary_report:
+                print_summary(summary_report=summary_report, context=context)
+            return summary_report
+        else:
+            return {}
 
     def _run_checks(
         self,
         checks: List[TSValidCheck],
-        to_test: Union[str, bytes],
+        to_test: str,
         context=Dict[str, Any],
-        fail=False,
-    ) -> List[TSValidReport]:
-        reports: List[TSValidReport] = []
+    ):
         for check in checks:
             self._run_check_and_append_report(
                 context=context,
                 to_check=to_test,
                 check=check,
-                reports=reports,
-                fail=fail,
             )
-        return reports
 
     def _run_check_and_append_report(
-        self, context, to_check, check, reports, fail=False
+        self, context: Dict[str, Any], to_check: str, check: TSValidCheck
     ):
-        reps = self._run_check(
-            check=check, to_check=to_check, context=context, fail=fail
-        )
-        if reps:
-            reports.extend(reps)
+        self._run_check(check=check, to_check=to_check, context=context)
 
-    def _run_check(
-        self, check: TSValidCheck, to_check: Union[str, bytes], context=None, fail=False
-    ) -> List[TSValidReport]:
+    def _run_check(self, check: TSValidCheck, to_check: str, context: Dict[str, Any]):
         check.log_check_info()
-        reports = []
         if check.error_code not in self.exceptions:
-            reps = check.check(to_check, context)
-            if fail and reps:
-                sys.exit(1)
-            reports.extend(reps)
-        return reports
+            success = check.check(to_check=to_check, context=context)
+            self._consider_failing(success)
+
+    def _consider_failing(self, success):
+        if self.fail and not success:
+            logging.error("Validation failed.")
+            sys.exit(1)

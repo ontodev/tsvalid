@@ -37,21 +37,39 @@ from tsvalid.io import validate_file
 @click.argument("input", required=True, type=click.Path())
 @click.option("--ignore", multiple=True)
 @click.option(
+    "--encoding",
+    default="utf-8",
+    help="The encoding defines how the TSV file should be interpreted as a string.",
+)
+@click.option(
+    "--comment",
+    help="Many TSV files use comments, typically a hash (#) "
+    "to denote that anything following a # symbol should be ignored. "
+    "If a comment symbol is supplied, and a row starts with that symbol, "
+    "no QC checks are run on that row.",
+    type=str,
+)
+@click.option(
     "--summary",
     default=False,
     is_flag=True,
     help="If true, prints an error summary at the end of validation.",
     show_default=True,
 )
-def validate(input: str, ignore: List[str], summary: bool):
+def validate(input: str, ignore: List[str], summary: bool, comment: str, encoding: str):
     """Validate a tsv file.
-
-    .. warning:: currently only supports conversion to RDF)
 
     Example:
         tsvalid validate table.tsv
-    """  # noqa: DAR101
-    validate_file(input_path=input, exceptions=ignore, summary=summary)
+    # noqa: DAR101
+    """
+    validate_file(
+        input_path=input,
+        exceptions=ignore,
+        summary=summary,
+        encoding=encoding,
+        comment=comment,
+    )
 
 
 if __name__ == "__main__":
