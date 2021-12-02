@@ -3,7 +3,7 @@
 TSValid: TSV Validation
 =====================================
 
-TBD
+TSValid is a CLI tool for validating tables.
 
 Contents
 --------
@@ -12,10 +12,10 @@ Contents
    :maxdepth: 2
    :caption: Contents:
 
-   modules
    installation
-   examples
+   checks
    cli_usage
+   modules
 
 
 Indices and tables

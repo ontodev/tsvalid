@@ -35,7 +35,14 @@ from tsvalid.io import validate_file
 
 @click.command()
 @click.argument("input", required=True, type=click.Path())
-@click.option("--ignore", multiple=True)
+@click.option(
+    "--skip",
+    multiple=True,
+    help="You can skip TSValid checks, by either naming them directly "
+    "or defining regular expression patterns to match groups of checks. "
+    "For example `--skip E2` skips the E2 check, and `--skip W.*` "
+    "skips all checks starting with a W.",
+)
 @click.option(
     "--encoding",
     default="utf-8",
@@ -56,7 +63,7 @@ from tsvalid.io import validate_file
     help="If true, prints an error summary at the end of validation.",
     show_default=True,
 )
-def validate(input: str, ignore: List[str], summary: bool, comment: str, encoding: str):
+def validate(input: str, skip: List[str], summary: bool, comment: str, encoding: str):
     """Validate a tsv file.
 
     Example:
@@ -65,7 +72,7 @@ def validate(input: str, ignore: List[str], summary: bool, comment: str, encodin
     """
     validate_file(
         input_path=input,
-        exceptions=ignore,
+        exceptions=skip,
         summary=summary,
         encoding=encoding,
         comment=comment,

@@ -9,7 +9,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>setup module &mdash; tsvalid 0.0.1 documentation</title>
+  <title>TSValid Checks &mdash; tsvalid 0.0.1 documentation</title>
   
 
   
@@ -38,8 +38,8 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="tsvalid package" href="tsvalid.html" />
-    <link rel="prev" title="TSValid" href="modules.html" /> 
+    <link rel="next" title="TSValid CLI usage" href="cli_usage.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,13 +86,9 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="checks.html">TSValid Checks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TSValid Checks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli_usage.html">TSValid CLI usage</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">TSValid</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">setup module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tsvalid.html">tsvalid package</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">TSValid</a></li>
 </ul>
 
             
@@ -138,16 +134,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="modules.html">TSValid</a> &raquo;</li>
-        
-      <li>setup module</li>
+      <li>TSValid Checks</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
             
-              <a href="https://github.com/ontodev/tsvalid/blob/sphinx_docs/sphinx/setup.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/ontodev/tsvalid/blob/sphinx_docs/sphinx/checks.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -161,9 +155,68 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-setup">
-<span id="setup-module"></span><h1>setup module<a class="headerlink" href="#module-setup" title="Permalink to this headline">¶</a></h1>
-<p>The setup module.</p>
+  <section id="tsvalid-checks">
+<h1>TSValid Checks<a class="headerlink" href="#tsvalid-checks" title="Permalink to this headline">¶</a></h1>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">List of checks</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 39%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Code</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>E0</p></td>
+<td><p>Unexpected File Encoding</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>E1</p></td>
+<td><p>Line break encoding</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>E2</p></td>
+<td><p>Redundant leading whitespace</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>E3</p></td>
+<td><p>Redundant trailing whitespace</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>E4</p></td>
+<td><p>Wrong number of tabs</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>E5</p></td>
+<td><p>Empty line</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>E6</p></td>
+<td><p>Missing value in header</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>E8</p></td>
+<td><p>Empty column</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>E9</p></td>
+<td><p>Empty last row</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>E10</p></td>
+<td><p>Duplicate value in header</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>W1</p></td>
+<td><p>Non ASCII character in cell</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 </section>
 
 
@@ -174,10 +227,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tsvalid.html" class="btn btn-neutral float-right" title="tsvalid package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="cli_usage.html" class="btn btn-neutral float-right" title="TSValid CLI usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="modules.html" class="btn btn-neutral float-left" title="TSValid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

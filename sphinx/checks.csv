@@ -1,0 +1,12 @@
+Code, Name, Description
+E0, Unexpected File Encoding,
+E1, Line break encoding,
+E2, Redundant leading whitespace,
+E3, Redundant trailing whitespace,
+E4, Wrong number of tabs,
+E5, Empty line,
+E6, Missing value in header,
+E8, Empty column,
+E9, Empty last row,
+E10, Duplicate value in header,
+W1, Non ASCII character in cell,

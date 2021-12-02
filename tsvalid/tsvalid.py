@@ -90,7 +90,7 @@ def _should_check(check, exceptions):
         if e == check:
             return False
         else:
-            pattern = re.compile(e)
+            pattern = re.compile(f"^{e}$")
             if pattern.match(check):
                 return False
     return True
@@ -155,18 +155,21 @@ def validate(
                             CHECK_TRAILING_WHITESPACE,
                             CHECK_NON_ASCII_CHARACTERS,
                         ]:
-
-                            if _should_check(
-                                test_register[check][KEY_ERROR_CODE], exceptions
-                            ):
-                                _run_check(cell, check, context, fail)
+                            _run_check(
+                                s=cell,
+                                check=check,
+                                context=context,
+                                fail=fail,
+                                exceptions=exceptions,
+                            )
                             _count_empty_cells(cell, context, str(idx))
                         if context[KEY_FIRST_ROW] == line_counter:
                             _run_check(
-                                cell,
-                                CHECK_MISSING_VALUE_IN_HEADER,
-                                context,
-                                fail,
+                                s=cell,
+                                check=CHECK_MISSING_VALUE_IN_HEADER,
+                                context=context,
+                                fail=fail,
+                                exceptions=exceptions,
                             )
 
                     context[KEY_COLUMN] = 0
@@ -178,10 +181,11 @@ def validate(
                         )
                     else:
                         _run_check(
-                            line_without_new_line,
-                            CHECK_NUMBER_OF_TABS,
-                            context,
-                            fail,
+                            s=line_without_new_line,
+                            check=CHECK_NUMBER_OF_TABS,
+                            context=context,
+                            fail=fail,
+                            exceptions=exceptions,
                         )
 
                     # If this is the first not-commented row, declare that in the context and
@@ -189,9 +193,10 @@ def validate(
                     if context[KEY_FIRST_ROW] == line_counter:
                         _run_check(
                             line_without_new_line,
-                            CHECK_DUPLICATE_VALUE_IN_HEADER_ROW,
-                            context,
-                            fail,
+                            check=CHECK_DUPLICATE_VALUE_IN_HEADER_ROW,
+                            context=context,
+                            fail=fail,
+                            exceptions=exceptions,
                         )
 
                     _run_check(
@@ -199,6 +204,7 @@ def validate(
                         check=CHECK_UNEXPECTED_LINE_BREAK_ENCODING,
                         context=context,
                         fail=fail,
+                        exceptions=exceptions,
                     )
 
                     if line_counter > 1:
@@ -206,7 +212,11 @@ def validate(
                         # in the file is allowed to be empty.
                         context[KEY_CURRENT_LINE] = line_counter - 1
                         _run_check(
-                            last_line_without_new_line, CHECK_EMPTY_LINE, context, fail
+                            s=last_line_without_new_line,
+                            check=CHECK_EMPTY_LINE,
+                            context=context,
+                            fail=fail,
+                            exceptions=exceptions,
                         )
 
                 last_line_without_new_line = line_without_new_line
@@ -220,14 +230,27 @@ def validate(
             check=CHECK_EMPTY_LAST_ROW,
             context=context,
             fail=fail,
+            exceptions=exceptions,
         )
 
         # Check no empty columns
         for column in context[KEY_COLUMN_VALUE_EMPTY_COUNTS]:
-            _run_check(s=column, check=CHECK_EMPTY_COLUMN, context=context, fail=fail)
+            _run_check(
+                s=column,
+                check=CHECK_EMPTY_COLUMN,
+                context=context,
+                fail=fail,
+                exceptions=exceptions,
+            )
     except UnicodeDecodeError as e:
         context[EXCEPTION_MESSAGE] = str(e)
-        _run_check(s="x", check=CHECK_FILE_ENCODING, context=context, fail=fail)
+        _run_check(
+            s="x",
+            check=CHECK_FILE_ENCODING,
+            context=context,
+            fail=fail,
+            exceptions=exceptions,
+        )
 
     # Print summary
     if summary and KEY_ERROR_SUMMARY in context:
@@ -239,9 +262,16 @@ def validate(
         return {}
 
 
-def _run_check(s: str, check: str, context: Dict[str, Any], fail=False):
-    result = check_id_function_map[check](context=context, to_check=s)
-    _handle_check_result(result=result, context=context, fail_hard=fail)
+def _run_check(
+    s: str, check: str, context: Dict[str, Any], fail=False, exceptions=None
+):
+    if exceptions is None:
+        exceptions = []
+    if _should_check(test_register[check][KEY_ERROR_CODE], exceptions):
+        result = check_id_function_map[check](context=context, to_check=s)
+        _handle_check_result(result=result, context=context, fail_hard=fail)
+    else:
+        logging.info(f"Check {check} skipped.")
 
 
 def _count_empty_cells(cell: str, context: Dict[str, Any], idx: str):

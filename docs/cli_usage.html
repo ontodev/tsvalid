@@ -1,33 +1,70 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TSValid CLI usage &mdash; tsvalid 0.0.1 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+  <title>TSValid CLI usage &mdash; tsvalid 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-    <script src="_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Examples" href="examples.html" /> 
+    <link rel="next" title="TSValid" href="modules.html" />
+    <link rel="prev" title="TSValid Checks" href="checks.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="index.html" class="icon icon-home"> tsvalid
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -35,49 +72,158 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="modules.html">TSValid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="checks.html">TSValid Checks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">TSValid CLI usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#tsvalid">tsvalid</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">TSValid</a></li>
 </ul>
 
+            
+          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">tsvalid</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
       <li>TSValid CLI usage</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+            
+            
               <a href="https://github.com/ontodev/tsvalid/blob/sphinx_docs/sphinx/cli_usage.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="tsvalid-cli-usage">
-<h1>TSValid CLI usage<a class="headerlink" href="#tsvalid-cli-usage" title="Permalink to this headline"></a></h1>
+<h1>TSValid CLI usage<a class="headerlink" href="#tsvalid-cli-usage" title="Permalink to this headline">¶</a></h1>
+<p>The first argument  in a TSValid command is always the TSV file.
+Without any arguments, all TSValid checks will be run.</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv
+</pre></div>
+</div>
+</div></blockquote>
+<p>The (shortened) output looks like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tests/data/test_all_wrong.tsv:1:0: E1: Invalid line <span class="nb">break</span> <span class="k">in</span> line <span class="m">1</span>.
+tests/data/test_all_wrong.tsv:2:0: E1: Invalid line <span class="nb">break</span> <span class="k">in</span> line <span class="m">2</span>.
+tests/data/test_all_wrong.tsv:3:0: E1: Invalid line <span class="nb">break</span> <span class="k">in</span> line <span class="m">3</span>.
+....
+</pre></div>
+</div>
+<p>If you want to display a summary of the errors, you can further provide a <cite>–summary</cite> parameter:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --summary
+
+tests/data/test_all_wrong.tsv:32:0: E4: Number of tabs <span class="k">in</span> line <span class="m">32</span> does not match tabs <span class="k">in</span> header.
+tests/data/test_all_wrong.tsv:31:0: E9: Last row <span class="k">in</span> file should be empty.
+
+<span class="c1">##### TSValid Summary #####</span>
+
+Error: unexpected Line Break Encoding
+ * count: <span class="m">31</span>
+ * error_code: E1
+
+Error: number Of Tabs Check
+ * count: <span class="m">16</span>
+ * error_code: E4
+
+Error: leading Whitespace Check
+ * count: <span class="m">1</span>
+ * error_code: E2
+
+Error: empty Line
+ * count: <span class="m">1</span>
+ * error_code: E5
+
+Error: empty Last Row
+ * count: <span class="m">1</span>
+ * error_code: E9
+</pre></div>
+</div>
+<p>If you wish to skip certain checks, you can use the –skip parameter like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --skip E9 --skip E2
+</pre></div>
+</div>
+<p>The above will run all TSValid checks apart from E9 and E2. You can also exclude checks using a
+regular expression pattern like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --skip E.* --summary
+</pre></div>
+</div>
+<p>This will skip all checks that match the regex <cite>^E.*$</cite>.</p>
+<p>Some TSV files come with commented lines. These can be explicitly skipped:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --comment <span class="s2">&quot;#&quot;</span>
+</pre></div>
+</div>
+<p>Any line thats starts with a comment character will be skipped this way.</p>
+<p>By default, TSV files are opened under the assumption that they are UTF-8 encoded. This default behaviour can be changed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --encoding <span class="s2">&quot;ascii&quot;</span>
 </pre></div>
 </div>
 <section id="tsvalid">
-<h2>tsvalid<a class="headerlink" href="#tsvalid" title="Permalink to this headline"></a></h2>
+<h2>tsvalid<a class="headerlink" href="#tsvalid" title="Permalink to this headline">¶</a></h2>
 <p>Validate a tsv file.</p>
 <dl class="simple">
 <dt>Example:</dt><dd><p>tsvalid validate table.tsv</p>
@@ -89,25 +235,26 @@
 </div>
 <p class="rubric">Options</p>
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-tsvalid-ignore">
-<span class="sig-name descname"><span class="pre">--ignore</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ignore&gt;</span></span><a class="headerlink" href="#cmdoption-tsvalid-ignore" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object std" id="cmdoption-tsvalid-skip">
+<span class="sig-name descname"><span class="pre">--skip</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;skip&gt;</span></span><a class="headerlink" href="#cmdoption-tsvalid-skip" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can skip TSValid checks, by either naming them directly or defining regular expression patterns to match groups of checks. For example <cite>–skip E2</cite> skips the E2 check, and <cite>–skip W.*</cite> skips all checks starting with a W.</p>
+</dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-tsvalid-encoding">
-<span class="sig-name descname"><span class="pre">--encoding</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;encoding&gt;</span></span><a class="headerlink" href="#cmdoption-tsvalid-encoding" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--encoding</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;encoding&gt;</span></span><a class="headerlink" href="#cmdoption-tsvalid-encoding" title="Permalink to this definition">¶</a></dt>
 <dd><p>The encoding defines how the TSV file should be interpreted as a string.</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-tsvalid-comment">
-<span class="sig-name descname"><span class="pre">--comment</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;comment&gt;</span></span><a class="headerlink" href="#cmdoption-tsvalid-comment" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--comment</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;comment&gt;</span></span><a class="headerlink" href="#cmdoption-tsvalid-comment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Many TSV files use comments, typically a hash (#) to denote that anything following a # symbol should be ignored. If a comment symbol is supplied, and a row starts with that symbol, no QC checks are run on that row.</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-tsvalid-summary">
-<span class="sig-name descname"><span class="pre">--summary</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-tsvalid-summary" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--summary</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-tsvalid-summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>If true, prints an error summary at the end of validation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Default</dt>
@@ -119,7 +266,7 @@
 <p class="rubric">Arguments</p>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-tsvalid-arg-INPUT">
-<span id="cmdoption-tsvalid-arg-input"></span><span class="sig-name descname"><span class="pre">INPUT</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-tsvalid-arg-INPUT" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-tsvalid-arg-input"></span><span class="sig-name descname"><span class="pre">INPUT</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-tsvalid-arg-INPUT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Required argument</p>
 </dd></dl>
 
@@ -128,32 +275,51 @@
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="modules.html" class="btn btn-neutral float-right" title="TSValid" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="checks.html" class="btn btn-neutral float-left" title="TSValid Checks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, James Overton, Nicolas Matentzoglu.</p>
-  </div>
+    <p>
+        &copy; Copyright 2021, James Overton, Nicolas Matentzoglu
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
