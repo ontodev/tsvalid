@@ -1,9 +1,19 @@
 """Utilities for TSValid."""
 
 import os
+import re
 from typing import Any, Dict
 
 import validators
+
+from tsvalid.constants import (
+    EXCEPTION_MESSAGE,
+    KEY_COLUMN,
+    KEY_CURRENT_LINE,
+    KEY_ERROR_CODE,
+    KEY_ERROR_MESSAGE,
+    KEY_FILENAME,
+)
 
 
 def raise_for_bad_path(file_path: str) -> None:
@@ -52,3 +62,35 @@ def calculate_line_endings(path: str) -> Dict[Any, Any]:
                     counts[x] += 1
                     break
     return counts
+
+
+def print_summary(summary_report: Dict[str, Any], context: Dict[str, Any]):
+    """Print summary of all reports gathered by a validation run."""
+    if summary_report:
+        print("")
+        print("##### TSValid Summary #####")
+        for e, info in summary_report.items():
+            print("")
+            print(
+                "Error: "
+                + " ".join(
+                    re.sub(
+                        "([A-Z][a-z]+)", r" \1", re.sub("([A-Z]+)", r" \1", e)
+                    ).split()
+                )
+            )
+            for key, value in info.items():
+                print(f" * {key}: {value}")
+    else:
+        print(f"tsvalid: {context[KEY_FILENAME]}: No errors found.")
+
+
+def print_validation_error(context: Dict[str, Any]):
+    """Print an error using the standard linter grammar."""
+    message = context[KEY_ERROR_MESSAGE]
+    if EXCEPTION_MESSAGE in context:
+        message = f'{message} Exception: "{context[EXCEPTION_MESSAGE]}".'
+    print(
+        f"{context[KEY_FILENAME]}:{context[KEY_CURRENT_LINE]}:{context[KEY_COLUMN]}: "
+        f"{context[KEY_ERROR_CODE]}: {message}"
+    )

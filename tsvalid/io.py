@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Optional
 
-from tsvalid.tsvalid import TSValidChecker
+from tsvalid.tsvalid import validate
 
 
 def validate_file(
@@ -24,7 +24,11 @@ def validate_file(
                         it is not included in the validation process.
     :returns: a dictionary with a summary of the validation run
     """
-    checker = TSValidChecker(
-        file_path=input_path, exceptions=exceptions, fail=fail_hard
+    return validate(
+        file_path=input_path,
+        exceptions=exceptions,
+        fail=fail_hard,
+        summary=summary,
+        encoding=encoding,
+        comment=comment,
     )
-    return checker.validate(summary=summary, encoding=encoding, comment=comment)
