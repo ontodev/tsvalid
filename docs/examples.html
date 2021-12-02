@@ -9,7 +9,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples &mdash; tsvalid 0.0.1 documentation</title>
+  <title>TSValid CLI usage &mdash; tsvalid 0.0.1 documentation</title>
   
 
   
@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="TSValid CLI usage" href="cli_usage.html" />
+    <link rel="next" title="TSValid Checks" href="checks.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -85,10 +85,11 @@
             
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="modules.html">TSValid</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli_usage.html">TSValid CLI usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TSValid CLI usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="checks.html">TSValid Checks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_usage.html">TSValid CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">TSValid</a></li>
 </ul>
 
             
@@ -134,7 +135,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Examples</li>
+      <li>TSValid CLI usage</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -155,9 +156,68 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="examples">
-<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
-<p>TODO</p>
+  <section id="tsvalid-cli-usage">
+<h1>TSValid CLI usage<a class="headerlink" href="#tsvalid-cli-usage" title="Permalink to this headline">¶</a></h1>
+<p>The first argument  in a TSValid command is always the TSV file.
+Without any arguments, all TSValid checks will be run.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv
+</pre></div>
+</div>
+<p>The (shortened) output looks like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tests/data/test_all_wrong.tsv:1:0: E1: Invalid line <span class="nb">break</span> <span class="k">in</span> line <span class="m">1</span>.
+tests/data/test_all_wrong.tsv:2:0: E1: Invalid line <span class="nb">break</span> <span class="k">in</span> line <span class="m">2</span>.
+tests/data/test_all_wrong.tsv:3:0: E1: Invalid line <span class="nb">break</span> <span class="k">in</span> line <span class="m">3</span>.
+....
+</pre></div>
+</div>
+<p>If you want to display a summary of the errors, you can further provide a <cite>–summary</cite> parameter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --summary
+
+tests/data/test_all_wrong.tsv:32:0: E4: Number of tabs <span class="k">in</span> line <span class="m">32</span> does not match tabs <span class="k">in</span> header.
+tests/data/test_all_wrong.tsv:31:0: E9: Last row <span class="k">in</span> file should be empty.
+
+<span class="c1">##### TSValid Summary #####</span>
+
+Error: unexpected Line Break Encoding
+ * count: <span class="m">31</span>
+ * error_code: E1
+
+Error: number Of Tabs Check
+ * count: <span class="m">16</span>
+ * error_code: E4
+
+Error: leading Whitespace Check
+ * count: <span class="m">1</span>
+ * error_code: E2
+
+Error: empty Line
+ * count: <span class="m">1</span>
+ * error_code: E5
+
+Error: empty Last Row
+ * count: <span class="m">1</span>
+ * error_code: E9
+</pre></div>
+</div>
+<p>If you wish to skip certain checks, you can use the –skip parameter like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --skip E9 --skip E2
+</pre></div>
+</div>
+<p>The above will run all TSValid checks apart from E9 and E2. You can also exclude checks using a
+regular expression pattern like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --skip E.* --summary
+</pre></div>
+</div>
+<p>This will skip all checks that match the regex <cite>^E.*$</cite>.</p>
+<p>Some TSV files come with commented lines. These can be explicitly skipped:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --comment <span class="s2">&quot;#&quot;</span>
+</pre></div>
+</div>
+<p>Any line thats starts with a comment character will be skipped this way.</p>
+<p>By default, TSV files are opened under the assumption that they are UTF-8 encoded. This default behaviour can be changed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tsvalid tests/data/test_all_wrong.tsv --encoding <span class="s2">&quot;ascii&quot;</span>
+</pre></div>
+</div>
 </section>
 
 
@@ -168,7 +228,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="cli_usage.html" class="btn btn-neutral float-right" title="TSValid CLI usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="checks.html" class="btn btn-neutral float-right" title="TSValid Checks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

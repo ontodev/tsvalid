@@ -13,6 +13,7 @@ Contents
    :caption: Contents:
 
    installation
+   examples
    checks
    cli_usage
    modules
