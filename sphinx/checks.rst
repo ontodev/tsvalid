@@ -1,5 +1,5 @@
-TSValid Checks
-=================
+List of checks
+==============
 
 .. csv-table:: List of checks
    :file: checks.csv

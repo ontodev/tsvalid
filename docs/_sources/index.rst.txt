@@ -15,8 +15,7 @@ Contents
    installation
    examples
    checks
-   cli_usage
-   modules
+   cli
 
 
 Indices and tables

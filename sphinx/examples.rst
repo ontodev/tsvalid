@@ -1,5 +1,5 @@
-TSValid CLI usage
-=================
+CLI examples
+============
 
 The first argument  in a TSValid command is always the TSV file.
 Without any arguments, all TSValid checks will be run.
