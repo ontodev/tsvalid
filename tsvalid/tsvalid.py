@@ -1,6 +1,7 @@
 """Checks TSValid."""
 import logging
 import re
+import io
 import sys
 from typing import Any, Dict, List, Optional
 
@@ -96,13 +97,14 @@ def _should_check(check, exceptions):
     return True
 
 
-def validate(
-    file_path: str,
+def validates(
+    stream: io.StringIO,
     exceptions: Optional[List[str]],
     encoding: str = "utf-8",
     summary=False,
     comment=None,
     fail=False,
+    filename="Unknown"
 ) -> Dict[str, Any]:
     """Validate a tsv file and run the hole suite of tests."""
     # Declare context. This is a lightweight dictionary with minimal contextual information such as
@@ -110,7 +112,7 @@ def validate(
     context: Dict[str, Any] = {
         KEY_CURRENT_LINE: 0,
         KEY_COLUMN: 0,
-        KEY_FILENAME: file_path,
+        KEY_FILENAME: filename,
         KEY_ENCODING: encoding,
         KEY_COLUMN_VALUE_EMPTY_COUNTS: {},
     }
@@ -126,101 +128,101 @@ def validate(
     # that a lot of the checks need some context to run, like checks that apply only to the first line, last line
     # and others
 
-    try:
-        with open(file_path, "r", encoding=encoding, newline="") as f:
-            for line in f:
-                line_counter = line_counter + 1
-                context[KEY_CURRENT_LINE] = line_counter
-                context[KEY_COLUMN] = 0
-                line_without_new_line = replace_newline_chars(line)
-                # print(f"Line {line_counter}: {line_without_new_line}")
+    if stream:
+        for line in stream:
+            line_counter = line_counter + 1
+            context[KEY_CURRENT_LINE] = line_counter
+            context[KEY_COLUMN] = 0
+            line_without_new_line = replace_newline_chars(line)
+            # print(f"Line {line_counter}: {line_without_new_line}")
 
-                # We ignore all rows that start with a #. This is risky, as you may have genuine
-                # cases where values in the first column start with a hash
-                if not comment or not line_without_new_line.startswith(comment):
+            # We ignore all rows that start with a #. This is risky, as you may have genuine
+            # cases where values in the first column start with a hash
+            if not comment or not line_without_new_line.startswith(comment):
 
-                    if KEY_FIRST_ROW not in context:
-                        # The Missing Value in Header Check only runs on the first row.
-                        context[KEY_FIRST_ROW] = line_counter
-                    # Check for empty values and document them in the context. This will later determine
-                    # the outcome of the Empty Column Check
-                    cell_list = line_without_new_line.split(COLUMN_SEPARATOR)
-                    for idx, cell in enumerate(cell_list):
-                        context[KEY_COLUMN] = (
-                            idx + 1
-                        )  # We reserve column 0 for line-level errors
+                if KEY_FIRST_ROW not in context:
+                    # The Missing Value in Header Check only runs on the first row.
+                    context[KEY_FIRST_ROW] = line_counter
+                # Check for empty values and document them in the context. This will later determine
+                # the outcome of the Empty Column Check
+                cell_list = line_without_new_line.split(COLUMN_SEPARATOR)
+                for idx, cell in enumerate(cell_list):
+                    context[KEY_COLUMN] = (
+                        idx + 1
+                    )  # We reserve column 0 for line-level errors
 
-                        for check in [
-                            CHECK_LEADING_WHITESPACE,
-                            CHECK_TRAILING_WHITESPACE,
-                            CHECK_NON_ASCII_CHARACTERS,
-                        ]:
-                            _run_check(
-                                s=cell,
-                                check=check,
-                                context=context,
-                                fail=fail,
-                                exceptions=exceptions,
-                            )
-                            _count_empty_cells(cell, context, str(idx))
-                        if context[KEY_FIRST_ROW] == line_counter:
-                            _run_check(
-                                s=cell,
-                                check=CHECK_MISSING_VALUE_IN_HEADER,
-                                context=context,
-                                fail=fail,
-                                exceptions=exceptions,
-                            )
-
-                    context[KEY_COLUMN] = 0
-
-                    if KEY_TAB_COUNT not in context:
-                        # If it is not in context, it means we are talking about the first row.
-                        context[KEY_TAB_COUNT] = line_without_new_line.count(
-                            COLUMN_SEPARATOR
-                        )
-                    else:
+                    for check in [
+                        CHECK_LEADING_WHITESPACE,
+                        CHECK_TRAILING_WHITESPACE,
+                        CHECK_NON_ASCII_CHARACTERS,
+                    ]:
                         _run_check(
-                            s=line_without_new_line,
-                            check=CHECK_NUMBER_OF_TABS,
+                            s=cell,
+                            check=check,
                             context=context,
                             fail=fail,
                             exceptions=exceptions,
                         )
-
-                    # If this is the first not-commented row, declare that in the context and
-                    # run first-row related checks
+                        _count_empty_cells(cell, context, str(idx))
                     if context[KEY_FIRST_ROW] == line_counter:
                         _run_check(
-                            line_without_new_line,
-                            check=CHECK_DUPLICATE_VALUE_IN_HEADER_ROW,
+                            s=cell,
+                            check=CHECK_MISSING_VALUE_IN_HEADER,
                             context=context,
                             fail=fail,
                             exceptions=exceptions,
                         )
 
+                context[KEY_COLUMN] = 0
+
+                if KEY_TAB_COUNT not in context:
+                    # If it is not in context, it means we are talking about the first row.
+                    context[KEY_TAB_COUNT] = line_without_new_line.count(
+                        COLUMN_SEPARATOR
+                    )
+                else:
                     _run_check(
-                        s=line,
-                        check=CHECK_UNEXPECTED_LINE_BREAK_ENCODING,
+                        s=line_without_new_line,
+                        check=CHECK_NUMBER_OF_TABS,
                         context=context,
                         fail=fail,
                         exceptions=exceptions,
                     )
 
-                    if line_counter > 1:
-                        # Do the empty line check on the _previous_ line, because the last line
-                        # in the file is allowed to be empty.
-                        context[KEY_CURRENT_LINE] = line_counter - 1
-                        _run_check(
-                            s=last_line_without_new_line,
-                            check=CHECK_EMPTY_LINE,
-                            context=context,
-                            fail=fail,
-                            exceptions=exceptions,
-                        )
+                # If this is the first not-commented row, declare that in the context and
+                # run first-row related checks
+                if context[KEY_FIRST_ROW] == line_counter:
+                    _run_check(
+                        line_without_new_line,
+                        check=CHECK_DUPLICATE_VALUE_IN_HEADER_ROW,
+                        context=context,
+                        fail=fail,
+                        exceptions=exceptions,
+                    )
 
-                last_line_without_new_line = line_without_new_line
-                last_line_with_new_line = line
+                _run_check(
+                    s=line,
+                    check=CHECK_UNEXPECTED_LINE_BREAK_ENCODING,
+                    context=context,
+                    fail=fail,
+                    exceptions=exceptions,
+                )
+
+                if line_counter > 1:
+                    # Do the empty line check on the _previous_ line, because the last line
+                    # in the file is allowed to be empty.
+                    context[KEY_CURRENT_LINE] = line_counter - 1
+                    _run_check(
+                        s=last_line_without_new_line,
+                        check=CHECK_EMPTY_LINE,
+                        context=context,
+                        fail=fail,
+                        exceptions=exceptions,
+                    )
+
+            last_line_without_new_line = line_without_new_line
+            last_line_with_new_line = line
+
         context[KEY_COLUMN] = 0
 
         # Last row should be empty
@@ -242,8 +244,9 @@ def validate(
                 fail=fail,
                 exceptions=exceptions,
             )
-    except UnicodeDecodeError as e:
-        context[EXCEPTION_MESSAGE] = str(e)
+
+    else:
+        context[EXCEPTION_MESSAGE] = "There is no stream, likely an error?"
         _run_check(
             s="x",
             check=CHECK_FILE_ENCODING,
@@ -251,6 +254,7 @@ def validate(
             fail=fail,
             exceptions=exceptions,
         )
+
 
     # Print summary
     if summary and KEY_ERROR_SUMMARY in context:
@@ -260,6 +264,32 @@ def validate(
         return summary_report
     else:
         return {}
+
+
+def _open_file(file_path: str, encoding: str):
+    with open(file_path, "r", encoding=encoding, newline="") as file:
+        file_content = file.read()
+    return io.StringIO(file_content)
+
+
+def validate(
+    file_path: str,
+    exceptions: Optional[List[str]],
+    encoding: str = "utf-8",
+    summary=False,
+    comment=None,
+    fail=False,
+) -> Dict[str, Any]:
+    """Validate a tsv file and run the hole suite of tests."""
+    # Declare context. This is a lightweight dictionary with minimal contextual information such as
+    # filename, line number, column number, last or first line, etc
+    stream = None
+    try:
+        stream = _open_file(file_path, encoding)
+    except UnicodeDecodeError as e:
+        logging.info(f"Unicode error {str(e)}")
+    return validates(stream=stream, exceptions=exceptions, encoding=encoding, summary=summary, comment=comment, fail=fail,
+              filename=file_path)
 
 
 def _run_check(
