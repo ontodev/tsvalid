@@ -1,9 +1,10 @@
 """Checks TSValid."""
+
+import io
 import logging
 import re
-import io
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from tsvalid.checks import check_id_function_map
 from tsvalid.constants import (
@@ -98,13 +99,13 @@ def _should_check(check, exceptions):
 
 
 def validates(
-    stream: io.StringIO,
+    stream: Union[io.StringIO, None],
     exceptions: Optional[List[str]],
     encoding: str = "utf-8",
     summary=False,
     comment=None,
     fail=False,
-    filename="Unknown"
+    filename="Unknown",
 ) -> Dict[str, Any]:
     """Validate a tsv file and run the hole suite of tests."""
     # Declare context. This is a lightweight dictionary with minimal contextual information such as
@@ -140,7 +141,6 @@ def validates(
             # We ignore all rows that start with a #. This is risky, as you may have genuine
             # cases where values in the first column start with a hash
             if not comment or not line_without_new_line.startswith(comment):
-
                 if KEY_FIRST_ROW not in context:
                     # The Missing Value in Header Check only runs on the first row.
                     context[KEY_FIRST_ROW] = line_counter
@@ -256,7 +256,6 @@ def validates(
             exceptions=exceptions,
         )
 
-
     # Print summary
     if summary and KEY_ERROR_SUMMARY in context:
         summary_report = context[KEY_ERROR_SUMMARY]
@@ -289,8 +288,16 @@ def validate(
         stream = _open_file(file_path, encoding)
     except UnicodeDecodeError as e:
         logging.info(f"Unicode error {str(e)}")
-    return validates(stream=stream, exceptions=exceptions, encoding=encoding, summary=summary, comment=comment, fail=fail,
-              filename=file_path)
+
+    return validates(
+        stream=stream,
+        exceptions=exceptions,
+        encoding=encoding,
+        summary=summary,
+        comment=comment,
+        fail=fail,
+        filename=file_path,
+    )
 
 
 def _run_check(
