@@ -129,6 +129,7 @@ def validates(
     # and others
 
     if stream:
+        stream.seek(0)
         for line in stream:
             line_counter = line_counter + 1
             context[KEY_CURRENT_LINE] = line_counter
