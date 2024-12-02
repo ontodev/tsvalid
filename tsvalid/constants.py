@@ -1,4 +1,5 @@
 """Constants for TSValid."""
+
 import re
 
 KEY_LAST_LINE = "last_line"

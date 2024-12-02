@@ -52,7 +52,16 @@ from tsvalid.io import validate_file
     help="If true, prints an error summary at the end of validation.",
     show_default=True,
 )
-def validate(input: str, skip: List[str], summary: bool, comment: str, encoding: str):
+@click.option(
+    "--fail",
+    default=False,
+    is_flag=True,
+    help="If true, the validation process will fail with an error.",
+    show_default=True,
+)
+def validate(
+    input: str, skip: List[str], summary: bool, comment: str, encoding: str, fail: bool
+):
     """Validate a tsv file.
 
     Example:
@@ -63,6 +72,7 @@ def validate(input: str, skip: List[str], summary: bool, comment: str, encoding:
         input_path=input,
         exceptions=skip,
         summary=summary,
+        fail_hard=fail,
         encoding=encoding,
         comment=comment,
     )

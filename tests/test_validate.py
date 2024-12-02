@@ -1,9 +1,10 @@
 """Tests for conversion utilities."""
+
 import os
 import unittest
 
 from tests.constants import data_dir
-from tsvalid.constants import (  # CHECK_FILE_ENCODING,
+from tsvalid.constants import (
     CHECK_DUPLICATE_VALUE_IN_HEADER_ROW,
     CHECK_EMPTY_COLUMN,
     CHECK_EMPTY_LAST_ROW,
