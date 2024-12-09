@@ -1,5 +1,6 @@
 """Utilities for TSValid."""
 
+import logging
 import os
 import re
 from typing import Any, Dict
@@ -90,7 +91,15 @@ def print_validation_error(context: Dict[str, Any]):
     message = context[KEY_ERROR_MESSAGE]
     if EXCEPTION_MESSAGE in context:
         message = f'{message} Exception: "{context[EXCEPTION_MESSAGE]}".'
-    print(
-        f"{context[KEY_FILENAME]}:{context[KEY_CURRENT_LINE]}:{context[KEY_COLUMN]}: "
+    filename_reference = ""
+    filename = context[KEY_FILENAME]
+    if filename != "Unknown":
+        filename_reference = f"{filename}:"
+    full_message = (
+        f"{filename_reference}{context[KEY_CURRENT_LINE]}:{context[KEY_COLUMN]}: "
         f"{context[KEY_ERROR_CODE]}: {message}"
     )
+    if context[KEY_ERROR_CODE].startswith("E"):
+        logging.error(full_message)
+    else:
+        logging.warning(full_message)
